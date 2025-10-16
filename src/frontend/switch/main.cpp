@@ -393,9 +393,34 @@ void UpdateAndDraw(u64& keysDown, u64& keysUp)
 
         rc_client_process_ra();
 
-        if ((PlatformKeysHeld & (HidNpadButton_ZL|HidNpadButton_ZR)) == (HidNpadButton_ZL|HidNpadButton_ZR))
+        //if ((PlatformKeysHeld & (HidNpadButton_ZL|HidNpadButton_ZR)) == (HidNpadButton_ZL|HidNpadButton_ZR))
+        if ((PlatformKeysHeld & (HidNpadButton_StickRUp)) == (HidNpadButton_StickRUp))
         {
             SetPause(true);
+        }
+        else if((PlatformKeysHeld & (HidNpadButton_ZL)) == (HidNpadButton_ZL))
+        {
+            //g_notification.Show("quicksaving...");
+            //g_notification.Render();
+            char filename[512];
+            int savestateSelected=-1;  // always use the 1st save
+            Frontend::GetSavestateName(savestateSelected + 1, filename, 512);
+            if (Frontend::SaveState(filename))
+                g_notification.Show("quicksave... ok");
+            else
+                g_notification.Show("quicksave... error");
+        }
+        else if((PlatformKeysHeld & (HidNpadButton_ZR)) == (HidNpadButton_ZR))
+        {
+            //g_notification.Show("quickloading..");
+            //g_notification.Render();
+            char filename[512];
+            int savestateSelected=-1;  // always use the 1st save
+            Frontend::GetSavestateName(savestateSelected + 1, filename, 512);
+            if (Frontend::LoadState(filename))
+                g_notification.Show("quickload... ok");
+            else
+                g_notification.Show("quickload... error");
         }
         else
         {
@@ -701,7 +726,8 @@ void UpdateAndDraw(u64& keysDown, u64& keysUp)
             static bool fastForwardToggle = false;
             static bool prevKeyPressed = false;
 
-            bool currentKeyPressed = Config::TouchscreenMode < 2 && (PlatformKeysHeld & (Config::LeftHandedMode ? HidNpadButton_ZR : HidNpadButton_ZL));
+            //bool currentKeyPressed = Config::TouchscreenMode < 2 && (PlatformKeysHeld & (Config::LeftHandedMode ? HidNpadButton_ZR : HidNpadButton_ZL));
+            bool currentKeyPressed = Config::TouchscreenMode < 2 && (PlatformKeysHeld & HidNpadButton_StickRRight);
 
             if (Config::FastForward) {
                 // "Hold"
@@ -860,6 +886,9 @@ void LoadROM(const char* file)
     }
 
     load_game_from_file(file);
+    
+    // TODO: add a setting
+    Frontend::EnableCheats(true);
 }
 
 void LoadBIOS()
