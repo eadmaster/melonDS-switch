@@ -403,8 +403,8 @@ void UpdateAndDraw(u64& keysDown, u64& keysUp)
             //g_notification.Show("quicksaving...");
             //g_notification.Render();
             char filename[512];
-            int savestateSelected=-1;  // always use the 1st save
-            Frontend::GetSavestateName(savestateSelected + 1, filename, 512);
+            Frontend::GetSavestateName(0, filename, 512);
+            strcpy(filename + strlen(filename) - 3, "mem"); // replace the extension with "mem" to load from memory (faster)
             if (Frontend::SaveState(filename))
                 g_notification.Show("quicksave... ok");
             else
@@ -415,13 +415,20 @@ void UpdateAndDraw(u64& keysDown, u64& keysUp)
             //g_notification.Show("quickloading..");
             //g_notification.Render();
             char filename[512];
-            int savestateSelected=-1;  // always use the 1st save
-            Frontend::GetSavestateName(savestateSelected + 1, filename, 512);
+            Frontend::GetSavestateName(0, filename, 512);
+            strcpy(filename + strlen(filename) - 3, "mem"); // replace the extension with "mem" to load from memory (faster)
             if (Frontend::LoadState(filename))
                 g_notification.Show("quickload... ok");
             else
                 g_notification.Show("quickload... error");
         }
+        // TODO: backport Rewind -> trigger with RS Left  https://github.com/Gheovgos/melonDS/issues/14
+        /* swap upper/lower screen with RS Down
+        else if ((PlatformKeysHeld & (HidNpadButton_StickRDown)) == (HidNpadButton_StickRDown))
+        {
+            Config::ScreenSwap = (Config::ScreenSwap ? 0 : 1); //toggle
+            UpdateScreenLayout();
+        }*/
         else
         {
             u32 rotatedKeyMappings[12];
@@ -1025,6 +1032,7 @@ int main(int argc, const char* argv[])
     nxlinkStdio();
 
     romfsInit();
+    //consoleInit(NULL);
     setInitialize();
 
     padConfigureInput(1, HidNpadStyleSet_NpadFullCtrl);
